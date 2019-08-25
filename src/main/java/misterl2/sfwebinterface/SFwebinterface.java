@@ -31,10 +31,10 @@ public class SFwebinterface {
     public void onServerStart(GameStartedServerEvent event) throws IOException {
         System.out.println("Starting WEB SERVICE!");
         HttpServer server = HttpServer.create(new InetSocketAddress(20512), 0);
-        server.createContext("/playerlist", new GetPlayerList());
-        server.createContext("/kick", new KickPlayer());
-        server.createContext("/ban", new BanPlayer());
-        server.createContext("/pardon", new PardonPlayer());
+        server.createContext("/playerlist", new GetPlayerList(logger));
+        server.createContext("/kick", new KickPlayer(logger));
+        server.createContext("/ban", new BanPlayer(logger));
+        server.createContext("/pardon", new PardonPlayer(logger));
         server.setExecutor(null); // creates a default executor
         server.start();
     }
