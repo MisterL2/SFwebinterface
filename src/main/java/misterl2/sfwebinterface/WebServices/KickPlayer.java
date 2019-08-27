@@ -24,6 +24,7 @@ public class KickPlayer extends WebServiceBase implements HttpHandler {
         Map<String, String> parameterMap;
         try {
             parameterMap = parseGETParameters(t);
+            System.out.println("Parameters parsed!");
         } catch (HandledInvalidInputException e) {
             System.out.println("Breakpoint A1");
             return;
@@ -35,6 +36,8 @@ public class KickPlayer extends WebServiceBase implements HttpHandler {
             System.out.println("Breakpoint A2");
             return;
         }
+
+        System.out.println("Breakpoint A3");
 
         Optional<String> reason = Optional.empty();
         if(parameterMap.containsKey("reason")) { //Reason can be left empty

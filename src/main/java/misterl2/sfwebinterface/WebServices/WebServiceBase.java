@@ -7,9 +7,13 @@ import org.slf4j.Logger;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import static java.util.stream.Collectors.toList;
 
 public abstract class WebServiceBase {
     protected Logger logger;
@@ -19,14 +23,19 @@ public abstract class WebServiceBase {
     }
 
     protected Map<String, String> parseGETParameters(HttpExchange conn) throws HandledInvalidInputException {
+        System.out.println("......-------.....");
         String query = conn.getRequestURI().getQuery();
-        Stream<String[]> parsedParams = Arrays.stream(query.split("&")).map(param -> param.split("="));
-        if(!parsedParams.allMatch(parameter -> parameter.length==2)) { //If any of the get parameters are faulty, e.g. have either 0 or >1 occurences of the '=' sign, which is used to split it
+        System.out.println(query);
+        if(query==null) { //Very important null-check, .getQuery() returns NULL rather than an empty string when there are no GET parameters!
+            return new HashMap<>(); //Empty map.
+        }
+        List<String[]> parsedParams = Arrays.stream(query.split("&")).map(param -> param.split("=")).collect(toList());
+        if(!parsedParams.stream().allMatch(parameter -> parameter.length==2)) { //If any of the get parameters are faulty, e.g. have either 0 or >1 occurences of the '=' sign, which is used to split it
             returnResponse(conn,400,"Invalid GET parameters!");
             System.out.println("Invalid GET parameters! " + query);
             throw new HandledInvalidInputException();
         }
-        return parsedParams.collect(Collectors.toMap(keyArray -> keyArray[0], keyArray -> keyArray[1]));
+        return parsedParams.stream().collect(Collectors.toMap(keyArray -> keyArray[0], keyArray -> keyArray[1]));
     }
 
     protected void returnResponse(HttpExchange conn, int code, String info) {
