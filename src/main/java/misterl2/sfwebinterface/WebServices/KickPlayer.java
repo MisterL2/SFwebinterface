@@ -40,17 +40,14 @@ public class KickPlayer extends WebServiceBase implements HttpHandler {
 
         Optional<String> reason = getGETParamValue("reason");
 
-        Task.builder().execute( //Moves execution to mainthread, which is necessary to interact with the game (i.e. kick player). Closing an HTTP connection on mainthread is considered "acceptable"
-                ()-> {
-                    try {
-                        kickPlayer(parameterMap.get("player"),reason); //Use optional.empty, NOT NULL
-                        System.out.println("Player was kicked!");
-                        returnResponse(t,200,parameterMap.get("player") + " was kicked!");
-                    } catch(InvalidInputException ex) { //If the player to be kicked is not online / doesn't exist
-                        System.out.println("No player with that name currently online -> 428");
-                        returnResponse(t,428,"There is currently no player with that name online!");
-                    }
-                }).submit(plugin);
+        try {
+            kickPlayer(parameterMap.get("player"),reason); //Use optional.empty, NOT NULL
+            System.out.println("Player was kicked!");
+            returnResponse(t,200,parameterMap.get("player") + " was kicked!");
+        } catch(InvalidInputException ex) { //If the player to be kicked is not online / doesn't exist
+            System.out.println("No player with that name currently online -> 428");
+            returnResponse(t,428,"There is currently no player with that name online!");
+        }
 
     }
 
