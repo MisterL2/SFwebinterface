@@ -2,6 +2,7 @@ package misterl2.sfwebinterface.WebServices;
 
 import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
+import misterl2.sfwebinterface.SFwebinterface;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import java.io.IOException;
@@ -9,8 +10,8 @@ import java.io.OutputStream;
 import java.util.stream.Collectors;
 
 public class GetPlayerList extends WebServiceBase implements HttpHandler {
-    public GetPlayerList(Logger logger) {
-        super(logger);
+    public GetPlayerList(SFwebinterface plugin, Logger logger) {
+        super(plugin, logger);
     }
 
     @Override

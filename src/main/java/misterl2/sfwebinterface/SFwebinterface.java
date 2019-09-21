@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.net.InetSocketAddress;
 
 import com.sun.net.httpserver.HttpServer;
+import org.spongepowered.api.plugin.PluginContainer;
+import org.spongepowered.api.plugin.PluginManager;
 
 @Plugin(
         id = "sfwebinterface",
@@ -31,10 +33,10 @@ public class SFwebinterface {
     public void onServerStart(GameStartedServerEvent event) throws IOException {
         System.out.println("Starting WEB SERVICE!");
         HttpServer server = HttpServer.create(new InetSocketAddress(20512), 0);
-        server.createContext("/playerlist", new GetPlayerList(logger));
-        server.createContext("/kick", new KickPlayer(logger));
-        server.createContext("/ban", new BanPlayer(logger));
-        server.createContext("/pardon", new PardonPlayer(logger));
+        server.createContext("/playerlist", new GetPlayerList(this,logger));
+        server.createContext("/kick", new KickPlayer(this,logger));
+        server.createContext("/ban", new BanPlayer(this,logger));
+        server.createContext("/pardon", new PardonPlayer(this,  logger));
         server.setExecutor(null); // creates a default executor
         server.start();
     }

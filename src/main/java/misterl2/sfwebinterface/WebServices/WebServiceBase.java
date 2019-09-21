@@ -2,14 +2,13 @@ package misterl2.sfwebinterface.WebServices;
 
 import com.sun.net.httpserver.HttpExchange;
 import misterl2.sfwebinterface.HandledInvalidInputException;
+import misterl2.sfwebinterface.SFwebinterface;
 import org.slf4j.Logger;
+import org.spongepowered.api.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -17,9 +16,11 @@ import static java.util.stream.Collectors.toList;
 
 public abstract class WebServiceBase {
     protected Logger logger;
+    protected SFwebinterface plugin;
+    protected Map<String, String> parameterMap;
 
-    public WebServiceBase(Logger logger) {
-        this.logger=logger;
+    public WebServiceBase(SFwebinterface plugin, Logger logger) {
+        this.plugin = plugin; this.logger=logger;
     }
 
     protected Map<String, String> parseGETParameters(HttpExchange conn) throws HandledInvalidInputException {
@@ -50,5 +51,8 @@ public abstract class WebServiceBase {
             logger.warn(ex.getMessage());
         }
 
+    }
+    protected Optional<String> getGETParamValue(String key) {
+        return Optional.ofNullable(parameterMap.get(key));
     }
 }

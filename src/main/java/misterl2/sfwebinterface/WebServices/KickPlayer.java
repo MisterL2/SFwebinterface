@@ -4,9 +4,11 @@ import com.sun.net.httpserver.HttpExchange;
 import com.sun.net.httpserver.HttpHandler;
 import misterl2.sfwebinterface.HandledInvalidInputException;
 import misterl2.sfwebinterface.InvalidInputException;
+import misterl2.sfwebinterface.SFwebinterface;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
 import java.io.IOException;
@@ -14,14 +16,13 @@ import java.util.Map;
 import java.util.Optional;
 
 public class KickPlayer extends WebServiceBase implements HttpHandler {
-    public KickPlayer(Logger logger) {
-        super(logger);
+    public KickPlayer(SFwebinterface plugin, Logger logger) {
+        super(plugin, logger);
     }
 
     @Override
     public void handle(HttpExchange t) {
         System.out.println("Kick player activated");
-        Map<String, String> parameterMap;
         try {
             parameterMap = parseGETParameters(t);
             System.out.println("Parameters parsed!");
@@ -37,21 +38,20 @@ public class KickPlayer extends WebServiceBase implements HttpHandler {
             return;
         }
 
-        System.out.println("Breakpoint A3");
+        Optional<String> reason = getGETParamValue("reason");
 
-        Optional<String> reason = Optional.empty();
-        if(parameterMap.containsKey("reason")) { //Reason can be left empty
-            reason = Optional.of(parameterMap.get("reason"));
-        }
-        System.out.println("Breakpoint A3");
-        try {
-            kickPlayer(parameterMap.get("player"),reason); //Use optional.empty, NOT NULL
-            System.out.println("Player was kicked!");
-            returnResponse(t,200,parameterMap.get("player") + " was kicked!");
-        } catch(InvalidInputException ex) { //If the player to be kicked is not online / doesn't exist
-            System.out.println("No player with that name currently online -> 428");
-            returnResponse(t,428,"There is currently no player with that name online!");
-        }
+        Task.builder().execute( //Moves execution to mainthread, which is necessary to interact with the game (i.e. kick player). Closing an HTTP connection on mainthread is considered "acceptable"
+                ()-> {
+                    try {
+                        kickPlayer(parameterMap.get("player"),reason); //Use optional.empty, NOT NULL
+                        System.out.println("Player was kicked!");
+                        returnResponse(t,200,parameterMap.get("player") + " was kicked!");
+                    } catch(InvalidInputException ex) { //If the player to be kicked is not online / doesn't exist
+                        System.out.println("No player with that name currently online -> 428");
+                        returnResponse(t,428,"There is currently no player with that name online!");
+                    }
+                }).submit(plugin);
+
     }
 
     private void kickPlayer(String playerName, Optional<String> reason) throws InvalidInputException {
