@@ -29,6 +29,6 @@ public class GetPlayerList extends WebServiceBase implements HttpHandler {
     }
 
     private String getPlayersCSV() {
-        return Sponge.getServer().getOnlinePlayers().stream().map(player -> player.getName()).collect(Collectors.joining(","));
+        return Sponge.getServer().getOnlinePlayers().stream().map(player -> player.getName() + "," + player.getLocation().getBlockX() + "," + player.getLocation().getBlockY() + "," + player.getLocation().getBlockZ()).collect(Collectors.joining("\n"));
     }
 }
