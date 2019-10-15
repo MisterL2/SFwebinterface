@@ -25,16 +25,16 @@ public abstract class WebServiceBase implements HttpHandler {
     }
 
     protected Map<String, String> parseGETParameters() throws HandledInvalidInputException {
-        System.out.println("......-------.....");
+//        System.out.println("......-------.....");
         String query = httpExchange.getRequestURI().getQuery();
-        System.out.println(query);
+//        System.out.println(query);
         if(query==null) { //Very important null-check, .getQuery() returns NULL rather than an empty string when there are no GET parameters!
             return new HashMap<>(); //Empty map.
         }
         List<String[]> parsedParams = Arrays.stream(query.split("&")).map(param -> param.split("=")).collect(toList());
         if(!parsedParams.stream().allMatch(parameter -> parameter.length==2)) { //If any of the get parameters are faulty, e.g. have either 0 or >1 occurences of the '=' sign, which is used to split it
             returnResponse(400,"Invalid GET parameters!");
-            System.out.println("Invalid GET parameters! " + query);
+//            System.out.println("Invalid GET parameters! " + query);
             throw new HandledInvalidInputException();
         }
         return parsedParams.stream().collect(Collectors.toMap(keyArray -> keyArray[0], keyArray -> keyArray[1]));
@@ -42,7 +42,7 @@ public abstract class WebServiceBase implements HttpHandler {
 
     protected void returnResponse(int code, String info) {
         try {
-            System.out.println("Sending response: " + info);
+//            System.out.println("Sending response: " + info);
             httpExchange.sendResponseHeaders(code,info.getBytes("UTF-8").length);
             OutputStream os = httpExchange.getResponseBody();
             os.write(info.getBytes());
@@ -73,7 +73,7 @@ public abstract class WebServiceBase implements HttpHandler {
         this.httpExchange=conn;
         try {
             parameterMap = parseGETParameters();
-            System.out.println("Parameters parsed!");
+//            System.out.println("Parameters parsed!");
         } catch (HandledInvalidInputException e) {
             logger.warn("GET-Parameters could not be parsed; Request has been declined!");
             return;
