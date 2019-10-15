@@ -1,10 +1,7 @@
 package misterl2.sfwebinterface;
 
 import com.google.inject.Inject;
-import misterl2.sfwebinterface.WebServices.BanPlayer;
-import misterl2.sfwebinterface.WebServices.GetPlayerList;
-import misterl2.sfwebinterface.WebServices.KickPlayer;
-import misterl2.sfwebinterface.WebServices.PardonPlayer;
+import misterl2.sfwebinterface.WebServices.*;
 import ninja.leaping.configurate.ConfigurationNode;
 import ninja.leaping.configurate.ValueType;
 import ninja.leaping.configurate.commented.CommentedConfigurationNode;
@@ -103,7 +100,9 @@ public class SFwebinterface {
         server.createContext("/ban", new BanPlayer(this,logger, password));
         server.createContext("/pardon", new PardonPlayer(this,  logger, password));
         if(executeArbitrary) {
-            //Execute arbitrary
+            //THIS IS HIGHLY DANGEROUS IF IN THE WRONG HANDS. MAKE SURE YOU KNOW WHAT YOU ARE DOING IF YOU ACTIVATE THIS!
+            logger.warn("Execution of arbitrary console commands has been ENABLED! This is potentially a dangerous security risk, so only enable it (in the config) if you really know what you are doing!");
+            server.createContext("/console", new ExecuteArbitraryCommand(this,  logger, password));
         }
         server.setExecutor(null); // creates a default executor
         server.start();
