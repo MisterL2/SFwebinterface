@@ -23,24 +23,24 @@ public class BanPlayer extends WebServiceBase {
     }
 
     @Override
-    public void handleAuthenticatedRequest(HttpExchange t) throws IOException {
-        final Optional<String> reason = getGETParamValue("reason");
-
+    public void handleAuthenticatedRequest() throws IOException {
+        final Optional<String> reason = getOptionalGETParam("reason");
+        final String playerName = getMandatoryGETParam("player");
         Task.builder().execute( //Moves execution to mainthread, which is necessary to interact with the game (i.e. ban player). Closing an HTTP connection on mainthread is considered "acceptable"
                 () -> {
                     try {
-                        banPlayer(parameterMap.get("player"), reason);
-                        System.out.println("Player was banned!");
-                        returnResponse(t,200,parameterMap.get("player") + " was banned!");
+                        banPlayer(playerName, reason);
+                        logger.info("Player \"" + playerName + "\" was banned!");
+                        returnResponse(200,playerName + " was banned!");
                     } catch (ExecutionException e) {
-                        System.out.println("No player with that name exists at all! -> 428");
-                        returnResponse(t,428,"There is no player with this username!"); //Player does not exist at all, including Mojang's database
+                        logger.warn("Could not ban player! There is no player with name " + playerName + " in the universe! -> 428");
+                        returnResponse(428,"There is no player with the username\"" + playerName + "\" !"); //Player does not exist at all, including Mojang's database
                     } catch (InterruptedException e) {
-                        System.out.println(e.getMessage());
-                        returnResponse(t,500,"An unexpected interruption occurred while trying to process the request!");
+                        logger.error(e.getMessage());
+                        returnResponse(500,"An unexpected interruption occurred while trying to process the request!");
                     } catch(Exception ex) {
-                        System.out.println(ex.getMessage());
-                        returnResponse(t,500,"An unexpected error occurred while trying to process the request!");
+                        logger.error(ex.getMessage());
+                        returnResponse(500,"An unexpected error occurred while trying to process the request!");
                     }
                 }
         ).submit(plugin);

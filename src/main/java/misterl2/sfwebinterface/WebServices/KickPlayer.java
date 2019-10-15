@@ -10,6 +10,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.text.Text;
 
+import java.io.IOException;
 import java.util.Optional;
 
 public class KickPlayer extends WebServiceBase {
@@ -18,25 +19,20 @@ public class KickPlayer extends WebServiceBase {
     }
 
     @Override
-    public void handleAuthenticatedRequest(HttpExchange t) {
+    public void handleAuthenticatedRequest() throws IOException {
         System.out.println("Kick player activated");
 
+        String playerName = getMandatoryGETParam("player"); //If param does not exist, this will throw HandledInvalidInputException (extends IOException) and close connection automatically.
 
-        if(!parameterMap.containsKey("player")) { // When the user to be kicked is not specified in the request
-            returnResponse(t,400,"The supplied get parameters did not have a 'player' attribute!");
-            System.out.println("Breakpoint A2");
-            return;
-        }
-
-        Optional<String> reason = getGETParamValue("reason");
+        Optional<String> reason = getOptionalGETParam("reason");
 
         try {
-            kickPlayer(parameterMap.get("player"),reason); //Use optional.empty, NOT NULL
-            System.out.println("Player was kicked!");
-            returnResponse(t,200,parameterMap.get("player") + " was kicked!");
+            kickPlayer(playerName,reason); //Use optional.empty, NOT NULL
+            logger.info("Player " + playerName + " was kicked!");
+            returnResponse(200,playerName + " was kicked!");
         } catch(InvalidInputException ex) { //If the player to be kicked is not online / doesn't exist
-            System.out.println("No player with that name currently online -> 428");
-            returnResponse(t,428,"There is currently no player with that name online!");
+            logger.warn("Declining kick-request: No player with that name currently online -> 428");
+            returnResponse(428,"There is currently no player with that name online!");
         }
 
     }

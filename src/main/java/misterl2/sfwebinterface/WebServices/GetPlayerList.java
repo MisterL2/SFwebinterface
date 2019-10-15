@@ -15,17 +15,16 @@ public class GetPlayerList extends WebServiceBase {
     }
 
     @Override
-    public void handleAuthenticatedRequest(HttpExchange t) throws IOException {
+    public void handleAuthenticatedRequest() throws IOException {
         String response = getPlayersCSV();
-        OutputStream os = t.getResponseBody();
+        OutputStream os = httpExchange.getResponseBody();
         if(response.length()==0) {
-            t.sendResponseHeaders(204,-1);
+            httpExchange.sendResponseHeaders(204,-1);
             os.close();
-            t.close();
-        } else {
-            returnResponse(t,200,response);
+            httpExchange.close();
+            return;
         }
-
+        returnResponse(200,response);
     }
 
     private String getPlayersCSV() {
