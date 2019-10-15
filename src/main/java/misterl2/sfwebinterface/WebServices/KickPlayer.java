@@ -8,28 +8,18 @@ import misterl2.sfwebinterface.SFwebinterface;
 import org.slf4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.text.Text;
 
-import java.io.IOException;
-import java.util.Map;
 import java.util.Optional;
 
-public class KickPlayer extends WebServiceBase implements HttpHandler {
-    public KickPlayer(SFwebinterface plugin, Logger logger) {
-        super(plugin, logger);
+public class KickPlayer extends WebServiceBase {
+    public KickPlayer(SFwebinterface plugin, Logger logger, String password) {
+        super(plugin, logger, password);
     }
 
     @Override
-    public void handle(HttpExchange t) {
+    public void handleAuthenticatedRequest(HttpExchange t) {
         System.out.println("Kick player activated");
-        try {
-            parameterMap = parseGETParameters(t);
-            System.out.println("Parameters parsed!");
-        } catch (HandledInvalidInputException e) {
-            System.out.println("Breakpoint A1");
-            return;
-        }
 
 
         if(!parameterMap.containsKey("player")) { // When the user to be kicked is not specified in the request

@@ -9,13 +9,13 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.stream.Collectors;
 
-public class GetPlayerList extends WebServiceBase implements HttpHandler {
-    public GetPlayerList(SFwebinterface plugin, Logger logger) {
-        super(plugin, logger);
+public class GetPlayerList extends WebServiceBase {
+    public GetPlayerList(SFwebinterface plugin, Logger logger, String password) {
+        super(plugin, logger, password);
     }
 
     @Override
-    public void handle(HttpExchange t) throws IOException {
+    public void handleAuthenticatedRequest(HttpExchange t) throws IOException {
         String response = getPlayersCSV();
         OutputStream os = t.getResponseBody();
         if(response.length()==0) {
@@ -29,6 +29,6 @@ public class GetPlayerList extends WebServiceBase implements HttpHandler {
     }
 
     private String getPlayersCSV() {
-        return Sponge.getServer().getOnlinePlayers().stream().map(player -> player.getName() + "," + player.getLocation().getBlockX() + "," + player.getLocation().getBlockY() + "," + player.getLocation().getBlockZ()).collect(Collectors.joining("\n"));
+        return Sponge.getServer().getOnlinePlayers().stream().map(player -> new StringBuilder().append(player.getName()).append(",").append(player.getLocation().getBlockX()).append(",").append(player.getLocation().getBlockY()).append(",").append(player.getLocation().getBlockZ()).toString()).collect(Collectors.joining("\n"));
     }
 }

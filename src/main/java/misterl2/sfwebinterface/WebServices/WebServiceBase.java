@@ -1,26 +1,26 @@
 package misterl2.sfwebinterface.WebServices;
 
 import com.sun.net.httpserver.HttpExchange;
+import com.sun.net.httpserver.HttpHandler;
 import misterl2.sfwebinterface.HandledInvalidInputException;
 import misterl2.sfwebinterface.SFwebinterface;
 import org.slf4j.Logger;
-import org.spongepowered.api.plugin.PluginContainer;
 
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.*;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static java.util.stream.Collectors.toList;
 
-public abstract class WebServiceBase {
+public abstract class WebServiceBase implements HttpHandler {
     protected Logger logger;
+    protected String password;
     protected SFwebinterface plugin;
     protected Map<String, String> parameterMap;
 
-    public WebServiceBase(SFwebinterface plugin, Logger logger) {
-        this.plugin = plugin; this.logger=logger;
+    public WebServiceBase(SFwebinterface plugin, Logger logger, String password) {
+        this.plugin = plugin; this.logger=logger; this.password = password;
     }
 
     protected Map<String, String> parseGETParameters(HttpExchange conn) throws HandledInvalidInputException {
@@ -55,4 +55,32 @@ public abstract class WebServiceBase {
     protected Optional<String> getGETParamValue(String key) {
         return Optional.ofNullable(parameterMap.get(key));
     }
+
+    @Override
+    public final void handle(HttpExchange t) throws IOException {
+        try {
+            parameterMap = parseGETParameters(t);
+            System.out.println("Parameters parsed!");
+        } catch (HandledInvalidInputException e) {
+            logger.error("GET-Parameters could not be parsed; Request has been declined!");
+            return;
+        }
+
+        if(!parameterMap.containsKey("password")) {
+            logger.error("Attempt to access webinterface service \"KickPlayer\" without supplying a password!");
+            returnResponse(t, 401, "You must provide a password for this service!");
+            return;
+        }
+
+        String receivedPassword = parameterMap.get("password");
+        if(!password.equals(receivedPassword)) {
+            logger.error("Attempt to access webinterface service \"KickPlayer\" with incorrect password \"" + receivedPassword + "\" !");
+            returnResponse(t, 401, "The password you provided was incorrect!");
+            return;
+        }
+
+        handleAuthenticatedRequest(t);
+    }
+
+    public abstract void handleAuthenticatedRequest(HttpExchange t) throws IOException;
 }

@@ -14,32 +14,19 @@ import org.spongepowered.api.text.Text;
 import org.spongepowered.api.util.ban.Ban;
 
 import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ExecutionException;
 
-public class BanPlayer extends WebServiceBase implements HttpHandler {
-    public BanPlayer(SFwebinterface plugin, Logger logger) {
-        super(plugin, logger);
+public class BanPlayer extends WebServiceBase {
+    public BanPlayer(SFwebinterface plugin, Logger logger, String password) {
+        super(plugin, logger, password);
     }
 
     @Override
-    public void handle(HttpExchange t) throws IOException {
-
-        try {
-            parameterMap = parseGETParameters(t);
-        } catch (HandledInvalidInputException e) {
-            return;
-        }
-        if(!parameterMap.containsKey("player")) {
-            returnResponse(t,400,"The supplied get parameters did not have a 'player' attribute!");
-            return;
-        }
+    public void handleAuthenticatedRequest(HttpExchange t) throws IOException {
         final Optional<String> reason = getGETParamValue("reason");
 
-
-        Task.builder().execute( //Moves execution to mainthread, which is necessary to interact with the game (i.e. kick player). Closing an HTTP connection on mainthread is considered "acceptable"
+        Task.builder().execute( //Moves execution to mainthread, which is necessary to interact with the game (i.e. ban player). Closing an HTTP connection on mainthread is considered "acceptable"
                 () -> {
                     try {
                         banPlayer(parameterMap.get("player"), reason);
